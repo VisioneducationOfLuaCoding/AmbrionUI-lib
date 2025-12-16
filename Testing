@@ -1,16 +1,17 @@
 --[[ 
-    Codex Style Mobile UI Library
-    Executor Friendly (Xeno / Mobile)
+    Codex Style PC UI Library
+    Rewritten for PC Executors
 ]]
 
 local Codex = {}
 Codex.__index = Codex
 
 local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Player = Players.LocalPlayer
 
--- Destroy old UI
+-- Cleanup old UI
 pcall(function()
     Player.PlayerGui:FindFirstChild("CodexUI"):Destroy()
 end)
@@ -21,33 +22,20 @@ gui.Name = "CodexUI"
 gui.ResetOnSpawn = false
 gui.Parent = Player:WaitForChild("PlayerGui")
 
--- Floating Button
-local openBtn = Instance.new("TextButton")
-openBtn.Size = UDim2.new(0, 56, 0, 56)
-openBtn.Position = UDim2.new(0, 16, 0.5, -28)
-openBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
-openBtn.Text = "≡"
-openBtn.TextSize = 26
-openBtn.TextColor3 = Color3.new(1,1,1)
-openBtn.BorderSizePixel = 0
-openBtn.AutoButtonColor = false
-openBtn.Parent = gui
-Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1,0)
-
--- Main Frame
+-- Main Window
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 320, 0, 380)
-main.Position = UDim2.new(0.5, -160, 1, 0)
+main.Size = UDim2.new(0, 420, 0, 460)
+main.Position = UDim2.new(0.5, -210, 0.5, -230)
 main.BackgroundColor3 = Color3.fromRGB(18,18,18)
-main.Visible = false
 main.BorderSizePixel = 0
+main.Visible = true
 main.Parent = gui
 Instance.new("UICorner", main).CornerRadius = UDim.new(0,14)
 
 -- Top Bar
 local top = Instance.new("Frame", main)
 top.Size = UDim2.new(1,0,0,44)
-top.BackgroundColor3 = Color3.fromRGB(22,22,22)
+top.BackgroundColor3 = Color3.fromRGB(24,24,24)
 top.BorderSizePixel = 0
 Instance.new("UICorner", top).CornerRadius = UDim.new(0,14)
 
@@ -57,63 +45,83 @@ title.BackgroundTransparency = 1
 title.Text = "CODEX"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
-title.TextColor3 = Color3.new(1,1,1)
+title.TextColor3 = Color3.fromRGB(255,255,255)
 
--- Tabs Holder
+-- Tabs
 local tabs = Instance.new("Frame", main)
-tabs.Position = UDim2.new(0,8,0,52)
-tabs.Size = UDim2.new(0,90,1,-60)
+tabs.Position = UDim2.new(0,10,0,54)
+tabs.Size = UDim2.new(0,120,1,-64)
 tabs.BackgroundTransparency = 1
 
 local tabLayout = Instance.new("UIListLayout", tabs)
-tabLayout.Padding = UDim.new(0,6)
+tabLayout.Padding = UDim.new(0,8)
 
--- Pages Holder
+-- Pages
 local pages = Instance.new("Frame", main)
-pages.Position = UDim2.new(0,106,0,52)
-pages.Size = UDim2.new(1,-114,1,-60)
+pages.Position = UDim2.new(0,140,0,54)
+pages.Size = UDim2.new(1,-150,1,-64)
 pages.BackgroundTransparency = 1
 
--- Open / Close Animation
-local opened = false
-openBtn.MouseButton1Click:Connect(function()
-    opened = not opened
-    main.Visible = true
-
-    TweenService:Create(
-        main,
-        TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-        {Position = opened and UDim2.new(0.5,-160,0.5,-190) or UDim2.new(0.5,-160,1,0)}
-    ):Play()
-
-    task.delay(0.25, function()
-        if not opened then
-            main.Visible = false
-        end
-    end)
+-- RightShift Toggle
+UIS.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.RightShift then
+        main.Visible = not main.Visible
+    end
 end)
 
--- TAB CREATION
+-- Dragging
+do
+    local dragging, dragStart, startPos
+
+    top.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = main.Position
+        end
+    end)
+
+    top.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    UIS.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            main.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+
+-- Create Tab
 function Codex:CreateTab(name)
     local tabBtn = Instance.new("TextButton", tabs)
-    tabBtn.Size = UDim2.new(1,0,0,38)
+    tabBtn.Size = UDim2.new(1,0,0,40)
     tabBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
     tabBtn.Text = name
     tabBtn.Font = Enum.Font.Gotham
     tabBtn.TextSize = 14
-    tabBtn.TextColor3 = Color3.new(1,1,1)
+    tabBtn.TextColor3 = Color3.fromRGB(255,255,255)
     tabBtn.BorderSizePixel = 0
     Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0,8)
 
     local page = Instance.new("ScrollingFrame", pages)
     page.Size = UDim2.new(1,0,1,0)
-    page.CanvasSize = UDim2.new(0,0,0,0)
     page.ScrollBarImageTransparency = 1
+    page.CanvasSize = UDim2.new(0,0,0,0)
     page.Visible = false
     page.BackgroundTransparency = 1
 
     local layout = Instance.new("UIListLayout", page)
-    layout.Padding = UDim.new(0,6)
+    layout.Padding = UDim.new(0,8)
 
     tabBtn.MouseButton1Click:Connect(function()
         for _,p in ipairs(pages:GetChildren()) do
@@ -127,15 +135,15 @@ function Codex:CreateTab(name)
     return page
 end
 
--- BUTTON ELEMENT
+-- Create Button
 function Codex:CreateButton(tab, text, callback)
     local btn = Instance.new("TextButton", tab)
-    btn.Size = UDim2.new(1,0,0,38)
+    btn.Size = UDim2.new(1,0,0,40)
     btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
     btn.Text = text
     btn.Font = Enum.Font.Gotham
     btn.TextSize = 14
-    btn.TextColor3 = Color3.new(1,1,1)
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
     btn.BorderSizePixel = 0
     btn.AutoButtonColor = false
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
@@ -145,7 +153,7 @@ function Codex:CreateButton(tab, text, callback)
     end)
 
     task.wait()
-    tab.CanvasSize = UDim2.new(0,0,0,tab.UIListLayout.AbsoluteContentSize.Y + 6)
+    tab.CanvasSize = UDim2.new(0,0,0,tab.UIListLayout.AbsoluteContentSize.Y + 10)
 end
 
 return Codex
