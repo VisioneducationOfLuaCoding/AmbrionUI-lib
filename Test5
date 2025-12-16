@@ -1,6 +1,6 @@
 --[[ 
     Codex Style PC UI Library
-    Sleek, Smooth, Detailed UI with Red Accent
+    Wider, Smooth, with Sliders and Toggles
 ]]
 
 local Codex = {}
@@ -24,15 +24,15 @@ gui.Parent = Player:WaitForChild("PlayerGui")
 
 -- Main Window
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 450, 0, 500)
-main.Position = UDim2.new(0.5, -225, 0.5, -250)
+main.Size = UDim2.new(0, 600, 0, 500) -- wider now
+main.Position = UDim2.new(0.5, -300, 0.5, -250)
 main.BackgroundColor3 = Color3.fromRGB(18,18,18)
 main.BorderSizePixel = 0
 main.Visible = true
 main.Parent = gui
 Instance.new("UICorner", main).CornerRadius = UDim.new(0,16)
 
--- Shadow (subtle depth)
+-- Shadow
 local shadow = Instance.new("Frame", main)
 shadow.Size = UDim2.new(1,6,1,6)
 shadow.Position = UDim2.new(0,-3,0,-3)
@@ -42,7 +42,7 @@ shadow.BorderSizePixel = 0
 shadow.ZIndex = 0
 Instance.new("UICorner", shadow).CornerRadius = UDim.new(0,16)
 
--- Red Accent Bar at top
+-- Red accent bar
 local accent = Instance.new("Frame", main)
 accent.Size = UDim2.new(1,0,0,4)
 accent.Position = UDim2.new(0,0,0,0)
@@ -71,27 +71,27 @@ title.ZIndex = 4
 -- Tabs
 local tabs = Instance.new("Frame", main)
 tabs.Position = UDim2.new(0,10,0,54)
-tabs.Size = UDim2.new(0,130,1,-64)
+tabs.Size = UDim2.new(0,150,1,-64)
 tabs.BackgroundTransparency = 1
 tabs.ZIndex = 3
 
 local tabLayout = Instance.new("UIListLayout", tabs)
-tabLayout.Padding = UDim.new(0,8)
+tabLayout.Padding = UDim.new(0,10)
 
 -- Pages Holder
 local pages = Instance.new("Frame", main)
-pages.Position = UDim2.new(0,150,0,54)
-pages.Size = UDim2.new(1,-160,1,-64)
+pages.Position = UDim2.new(0,170,0,54)
+pages.Size = UDim2.new(1,-180,1,-64)
 pages.BackgroundTransparency = 1
 pages.ZIndex = 3
 
--- RightShift Toggle with Tween
+-- Toggle visibility
 local toggled = true
 UIS.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
         toggled = not toggled
-        local targetPos = toggled and UDim2.new(0.5,-225,0.5,-250) or UDim2.new(0.5,-225,1,50)
+        local targetPos = toggled and UDim2.new(0.5,-300,0.5,-250) or UDim2.new(0.5,-300,1,50)
         TweenService:Create(main, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = targetPos}):Play()
     end
 end)
@@ -99,7 +99,6 @@ end)
 -- Dragging
 do
     local dragging, dragStart, startPos
-
     top.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
@@ -107,13 +106,11 @@ do
             startPos = main.Position
         end
     end)
-
     top.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
     end)
-
     UIS.InputChanged:Connect(function(input)
         if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             local delta = input.Position - dragStart
@@ -130,7 +127,7 @@ end
 -- Create Tab
 function Codex:CreateTab(name)
     local tabBtn = Instance.new("TextButton", tabs)
-    tabBtn.Size = UDim2.new(1,0,0,42)
+    tabBtn.Size = UDim2.new(1,0,0,44)
     tabBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
     tabBtn.Text = name
     tabBtn.Font = Enum.Font.Gotham
@@ -138,7 +135,7 @@ function Codex:CreateTab(name)
     tabBtn.TextColor3 = Color3.fromRGB(255,255,255)
     tabBtn.BorderSizePixel = 0
     tabBtn.ZIndex = 4
-    Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0,10)
+    Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0,12)
 
     -- Hover effect
     tabBtn.MouseEnter:Connect(function()
@@ -157,7 +154,15 @@ function Codex:CreateTab(name)
     page.ZIndex = 3
 
     local layout = Instance.new("UIListLayout", page)
-    layout.Padding = UDim.new(0,8)
+    layout.Padding = UDim.new(0,10)
+
+    -- Red selection line under tab
+    local selectLine = Instance.new("Frame", tabBtn)
+    selectLine.Size = UDim2.new(0,0,0,3)
+    selectLine.Position = UDim2.new(0,0,1,0)
+    selectLine.BackgroundColor3 = Color3.fromRGB(255,50,50)
+    selectLine.BorderSizePixel = 0
+    selectLine.ZIndex = 5
 
     tabBtn.MouseButton1Click:Connect(function()
         for _,p in ipairs(pages:GetChildren()) do
@@ -172,8 +177,18 @@ function Codex:CreateTab(name)
         end
         page.Visible = true
         page.Position = UDim2.new(1,0,0,0)
-        TweenService:Create(page, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0,0,0,0)}):Play()
+        TweenService:Create(page, TweenInfo.new(0.25), {Position = UDim2.new(0,0,0,0)}):Play()
+
+        -- Animate red line
+        for _,tab in ipairs(tabs:GetChildren()) do
+            if tab:IsA("TextButton") then
+                TweenService:Create(tab.selectLine, TweenInfo.new(0.2), {Size = UDim2.new(0,0,0,3)}):Play()
+            end
+        end
+        TweenService:Create(selectLine, TweenInfo.new(0.2), {Size = UDim2.new(1,0,0,3)}):Play()
     end)
+
+    tabBtn.selectLine = selectLine
 
     return page
 end
@@ -181,7 +196,7 @@ end
 -- Create Button
 function Codex:CreateButton(tab, text, callback)
     local btn = Instance.new("TextButton", tab)
-    btn.Size = UDim2.new(1,0,0,42)
+    btn.Size = UDim2.new(1,0,0,44)
     btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
     btn.Text = text
     btn.Font = Enum.Font.Gotham
@@ -190,9 +205,8 @@ function Codex:CreateButton(tab, text, callback)
     btn.BorderSizePixel = 0
     btn.AutoButtonColor = false
     btn.ZIndex = 4
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,12)
 
-    -- Hover effect
     btn.MouseEnter:Connect(function()
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45,45,45)}):Play()
     end)
@@ -202,6 +216,98 @@ function Codex:CreateButton(tab, text, callback)
 
     btn.MouseButton1Click:Connect(function()
         pcall(callback)
+    end)
+
+    task.wait()
+    tab.CanvasSize = UDim2.new(0,0,0,tab.UIListLayout.AbsoluteContentSize.Y + 10)
+end
+
+-- Create Toggle
+function Codex:CreateToggle(tab, text, default, callback)
+    local toggleFrame = Instance.new("Frame", tab)
+    toggleFrame.Size = UDim2.new(1,0,0,40)
+    toggleFrame.BackgroundTransparency = 1
+
+    local label = Instance.new("TextLabel", toggleFrame)
+    label.Size = UDim2.new(0.7,0,1,0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(255,255,255)
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 14
+    label.TextXAlignment = Enum.TextXAlignment.Left
+
+    local toggleBtn = Instance.new("TextButton", toggleFrame)
+    toggleBtn.Size = UDim2.new(0,40,0,20)
+    toggleBtn.Position = UDim2.new(1,-50,0,10)
+    toggleBtn.BackgroundColor3 = default and Color3.fromRGB(255,50,50) or Color3.fromRGB(60,60,60)
+    toggleBtn.BorderSizePixel = 0
+    toggleBtn.AutoButtonColor = false
+    toggleBtn.Text = ""
+    Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0,10)
+
+    local state = default
+
+    toggleBtn.MouseButton1Click:Connect(function()
+        state = not state
+        TweenService:Create(toggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = state and Color3.fromRGB(255,50,50) or Color3.fromRGB(60,60,60)}):Play()
+        pcall(callback, state)
+    end)
+
+    task.wait()
+    tab.CanvasSize = UDim2.new(0,0,0,tab.UIListLayout.AbsoluteContentSize.Y + 10)
+end
+
+-- Create Slider
+function Codex:CreateSlider(tab, text, min, max, default, callback)
+    local sliderFrame = Instance.new("Frame", tab)
+    sliderFrame.Size = UDim2.new(1,0,0,40)
+    sliderFrame.BackgroundTransparency = 1
+
+    local label = Instance.new("TextLabel", sliderFrame)
+    label.Size = UDim2.new(0.7,0,1,0)
+    label.BackgroundTransparency = 1
+    label.Text = text.." : "..default
+    label.TextColor3 = Color3.fromRGB(255,255,255)
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 14
+    label.TextXAlignment = Enum.TextXAlignment.Left
+
+    local sliderBg = Instance.new("Frame", sliderFrame)
+    sliderBg.Size = UDim2.new(0.7,0,0,6)
+    sliderBg.Position = UDim2.new(0.28,0,0.5,-3)
+    sliderBg.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    sliderBg.BorderSizePixel = 0
+    Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(0,3)
+
+    local sliderFill = Instance.new("Frame", sliderBg)
+    sliderFill.Size = UDim2.new((default-min)/(max-min),0,1,0)
+    sliderFill.BackgroundColor3 = Color3.fromRGB(255,50,50)
+    sliderFill.BorderSizePixel = 0
+    Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(0,3)
+
+    local dragging = false
+    local UIS = game:GetService("UserInputService")
+
+    sliderFill.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+        end
+    end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local mouseX = input.Position.X - sliderBg.AbsolutePosition.X
+            mouseX = math.clamp(mouseX,0,sliderBg.AbsoluteSize.X)
+            sliderFill.Size = UDim2.new(mouseX/sliderBg.AbsoluteSize.X,0,1,0)
+            local value = math.floor((mouseX/sliderBg.AbsoluteSize.X)*(max-min) + min)
+            label.Text = text.." : "..value
+            pcall(callback, value)
+        end
     end)
 
     task.wait()
