@@ -1,6 +1,6 @@
 --[[ 
     Codex Style PC UI Library
-    Smooth & Clean with Red Accent
+    Sleek, Smooth, Detailed UI with Red Accent
 ]]
 
 local Codex = {}
@@ -24,20 +24,31 @@ gui.Parent = Player:WaitForChild("PlayerGui")
 
 -- Main Window
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 420, 0, 460)
-main.Position = UDim2.new(0.5, -210, 0.5, -230)
+main.Size = UDim2.new(0, 450, 0, 500)
+main.Position = UDim2.new(0.5, -225, 0.5, -250)
 main.BackgroundColor3 = Color3.fromRGB(18,18,18)
 main.BorderSizePixel = 0
 main.Visible = true
 main.Parent = gui
-Instance.new("UICorner", main).CornerRadius = UDim.new(0,14)
+Instance.new("UICorner", main).CornerRadius = UDim.new(0,16)
 
--- Red Accent Bar
+-- Shadow (subtle depth)
+local shadow = Instance.new("Frame", main)
+shadow.Size = UDim2.new(1,6,1,6)
+shadow.Position = UDim2.new(0,-3,0,-3)
+shadow.BackgroundColor3 = Color3.fromRGB(0,0,0)
+shadow.BackgroundTransparency = 0.85
+shadow.BorderSizePixel = 0
+shadow.ZIndex = 0
+Instance.new("UICorner", shadow).CornerRadius = UDim.new(0,16)
+
+-- Red Accent Bar at top
 local accent = Instance.new("Frame", main)
 accent.Size = UDim2.new(1,0,0,4)
 accent.Position = UDim2.new(0,0,0,0)
 accent.BackgroundColor3 = Color3.fromRGB(255,50,50)
 accent.BorderSizePixel = 0
+accent.ZIndex = 2
 
 -- Top Bar
 local top = Instance.new("Frame", main)
@@ -45,7 +56,8 @@ top.Size = UDim2.new(1,0,0,44)
 top.Position = UDim2.new(0,0,0,4)
 top.BackgroundColor3 = Color3.fromRGB(24,24,24)
 top.BorderSizePixel = 0
-Instance.new("UICorner", top).CornerRadius = UDim.new(0,14)
+top.ZIndex = 3
+Instance.new("UICorner", top).CornerRadius = UDim.new(0,16)
 
 local title = Instance.new("TextLabel", top)
 title.Size = UDim2.new(1,0,1,0)
@@ -54,29 +66,33 @@ title.Text = "CODEX"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.TextColor3 = Color3.fromRGB(255,255,255)
+title.ZIndex = 4
 
 -- Tabs
 local tabs = Instance.new("Frame", main)
 tabs.Position = UDim2.new(0,10,0,54)
-tabs.Size = UDim2.new(0,120,1,-64)
+tabs.Size = UDim2.new(0,130,1,-64)
 tabs.BackgroundTransparency = 1
+tabs.ZIndex = 3
 
 local tabLayout = Instance.new("UIListLayout", tabs)
 tabLayout.Padding = UDim.new(0,8)
 
--- Pages
+-- Pages Holder
 local pages = Instance.new("Frame", main)
-pages.Position = UDim2.new(0,140,0,54)
-pages.Size = UDim2.new(1,-150,1,-64)
+pages.Position = UDim2.new(0,150,0,54)
+pages.Size = UDim2.new(1,-160,1,-64)
 pages.BackgroundTransparency = 1
+pages.ZIndex = 3
 
--- RightShift Toggle with Smooth Tween
+-- RightShift Toggle with Tween
+local toggled = true
 UIS.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
-        local targetPos = main.Visible and UDim2.new(0.5,-210,0.5,-230) or UDim2.new(0.5,-210,1,50)
-        TweenService:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = targetPos}):Play()
-        main.Visible = not main.Visible
+        toggled = not toggled
+        local targetPos = toggled and UDim2.new(0.5,-225,0.5,-250) or UDim2.new(0.5,-225,1,50)
+        TweenService:Create(main, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = targetPos}):Play()
     end
 end)
 
@@ -114,14 +130,15 @@ end
 -- Create Tab
 function Codex:CreateTab(name)
     local tabBtn = Instance.new("TextButton", tabs)
-    tabBtn.Size = UDim2.new(1,0,0,40)
+    tabBtn.Size = UDim2.new(1,0,0,42)
     tabBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
     tabBtn.Text = name
     tabBtn.Font = Enum.Font.Gotham
     tabBtn.TextSize = 14
     tabBtn.TextColor3 = Color3.fromRGB(255,255,255)
     tabBtn.BorderSizePixel = 0
-    Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0,8)
+    tabBtn.ZIndex = 4
+    Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0,10)
 
     -- Hover effect
     tabBtn.MouseEnter:Connect(function()
@@ -133,10 +150,11 @@ function Codex:CreateTab(name)
 
     local page = Instance.new("ScrollingFrame", pages)
     page.Size = UDim2.new(1,0,1,0)
+    page.BackgroundTransparency = 1
     page.ScrollBarImageTransparency = 1
     page.CanvasSize = UDim2.new(0,0,0,0)
     page.Visible = false
-    page.BackgroundTransparency = 1
+    page.ZIndex = 3
 
     local layout = Instance.new("UIListLayout", page)
     layout.Padding = UDim.new(0,8)
@@ -144,10 +162,17 @@ function Codex:CreateTab(name)
     tabBtn.MouseButton1Click:Connect(function()
         for _,p in ipairs(pages:GetChildren()) do
             if p:IsA("ScrollingFrame") then
-                p.Visible = false
+                if p.Visible then
+                    TweenService:Create(p, TweenInfo.new(0.25), {Position = UDim2.new(1,0,0,0)}):Play()
+                    task.wait(0.05)
+                    p.Visible = false
+                    p.Position = UDim2.new(0,0,0,0)
+                end
             end
         end
         page.Visible = true
+        page.Position = UDim2.new(1,0,0,0)
+        TweenService:Create(page, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0,0,0,0)}):Play()
     end)
 
     return page
@@ -156,7 +181,7 @@ end
 -- Create Button
 function Codex:CreateButton(tab, text, callback)
     local btn = Instance.new("TextButton", tab)
-    btn.Size = UDim2.new(1,0,0,40)
+    btn.Size = UDim2.new(1,0,0,42)
     btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
     btn.Text = text
     btn.Font = Enum.Font.Gotham
@@ -164,7 +189,8 @@ function Codex:CreateButton(tab, text, callback)
     btn.TextColor3 = Color3.fromRGB(255,255,255)
     btn.BorderSizePixel = 0
     btn.AutoButtonColor = false
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
+    btn.ZIndex = 4
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
 
     -- Hover effect
     btn.MouseEnter:Connect(function()
