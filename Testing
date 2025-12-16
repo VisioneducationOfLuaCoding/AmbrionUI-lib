@@ -1,0 +1,124 @@
+-- Codex Style UI Library
+local CodexUI = {}
+CodexUI.__index = CodexUI
+
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+
+-- Create ScreenGui
+local gui = Instance.new("ScreenGui")
+gui.Name = "CodexUI"
+gui.ResetOnSpawn = false
+gui.Parent = game.CoreGui
+
+-- Floating Button
+local openButton = Instance.new("ImageButton")
+openButton.Size = UDim2.new(0, 60, 0, 60)
+openButton.Position = UDim2.new(0, 20, 0.5, -30)
+openButton.BackgroundColor3 = Color3.fromRGB(30,30,30)
+openButton.Image = "rbxassetid://3926305904" -- icon
+openButton.ImageRectOffset = Vector2.new(964, 324)
+openButton.ImageRectSize = Vector2.new(36, 36)
+openButton.Parent = gui
+openButton.AutoButtonColor = false
+openButton.BorderSizePixel = 0
+openButton.ClipsDescendants = true
+openButton.BackgroundTransparency = 0
+openButton.AnchorPoint = Vector2.new(0,0)
+openButton.Name = "OpenButton"
+openButton.Roundness = Instance.new("UICorner", openButton)
+openButton.Roundness.CornerRadius = UDim.new(1,0)
+
+-- Main Frame
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 320, 0, 380)
+main.Position = UDim2.new(0.5, -160, 0.5, -190)
+main.BackgroundColor3 = Color3.fromRGB(20,20,20)
+main.Visible = false
+main.Parent = gui
+main.BorderSizePixel = 0
+Instance.new("UICorner", main).CornerRadius = UDim.new(0,14)
+
+-- Top Bar
+local top = Instance.new("Frame", main)
+top.Size = UDim2.new(1,0,0,45)
+top.BackgroundColor3 = Color3.fromRGB(25,25,25)
+top.BorderSizePixel = 0
+Instance.new("UICorner", top).CornerRadius = UDim.new(0,14)
+
+local title = Instance.new("TextLabel", top)
+title.Size = UDim2.new(1,0,1,0)
+title.Text = "CODEX"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+
+-- Tabs Holder
+local tabs = Instance.new("Frame", main)
+tabs.Position = UDim2.new(0,10,0,55)
+tabs.Size = UDim2.new(0,90,1,-65)
+tabs.BackgroundTransparency = 1
+
+local pages = Instance.new("Frame", main)
+pages.Position = UDim2.new(0,110,0,55)
+pages.Size = UDim2.new(1,-120,1,-65)
+pages.BackgroundTransparency = 1
+
+-- Toggle Menu
+local opened = false
+openButton.MouseButton1Click:Connect(function()
+    opened = not opened
+    main.Visible = opened
+end)
+
+-- Tab System
+function CodexUI:CreateTab(name)
+    local tabBtn = Instance.new("TextButton", tabs)
+    tabBtn.Size = UDim2.new(1,0,0,40)
+    tabBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
+    tabBtn.Text = name
+    tabBtn.TextColor3 = Color3.fromRGB(255,255,255)
+    tabBtn.Font = Enum.Font.Gotham
+    tabBtn.TextSize = 14
+    tabBtn.BorderSizePixel = 0
+    Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0,8)
+
+    local page = Instance.new("ScrollingFrame", pages)
+    page.Size = UDim2.new(1,0,1,0)
+    page.CanvasSize = UDim2.new(0,0,0,0)
+    page.ScrollBarImageTransparency = 1
+    page.Visible = false
+    page.BackgroundTransparency = 1
+
+    tabBtn.MouseButton1Click:Connect(function()
+        for _,p in pairs(pages:GetChildren()) do
+            if p:IsA("ScrollingFrame") then
+                p.Visible = false
+            end
+        end
+        page.Visible = true
+    end)
+
+    return page
+end
+
+-- Button Element
+function CodexUI:CreateButton(tab, text, callback)
+    local btn = Instance.new("TextButton", tab)
+    btn.Size = UDim2.new(1,-10,0,40)
+    btn.Position = UDim2.new(0,5,0,5 + (#tab:GetChildren()*45))
+    btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.Font = Enum.Font.Gotham
+    btn.TextSize = 14
+    btn.BorderSizePixel = 0
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
+
+    btn.MouseButton1Click:Connect(function()
+        pcall(callback)
+    end)
+end
+
+return CodexUI
