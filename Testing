@@ -1,6 +1,6 @@
 --[[ 
     Codex Style PC UI Library
-    Rewritten for PC Executors
+    Smooth & Clean with Red Accent
 ]]
 
 local Codex = {}
@@ -32,9 +32,17 @@ main.Visible = true
 main.Parent = gui
 Instance.new("UICorner", main).CornerRadius = UDim.new(0,14)
 
+-- Red Accent Bar
+local accent = Instance.new("Frame", main)
+accent.Size = UDim2.new(1,0,0,4)
+accent.Position = UDim2.new(0,0,0,0)
+accent.BackgroundColor3 = Color3.fromRGB(255,50,50)
+accent.BorderSizePixel = 0
+
 -- Top Bar
 local top = Instance.new("Frame", main)
 top.Size = UDim2.new(1,0,0,44)
+top.Position = UDim2.new(0,0,0,4)
 top.BackgroundColor3 = Color3.fromRGB(24,24,24)
 top.BorderSizePixel = 0
 Instance.new("UICorner", top).CornerRadius = UDim.new(0,14)
@@ -62,10 +70,12 @@ pages.Position = UDim2.new(0,140,0,54)
 pages.Size = UDim2.new(1,-150,1,-64)
 pages.BackgroundTransparency = 1
 
--- RightShift Toggle
+-- RightShift Toggle with Smooth Tween
 UIS.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
+        local targetPos = main.Visible and UDim2.new(0.5,-210,0.5,-230) or UDim2.new(0.5,-210,1,50)
+        TweenService:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = targetPos}):Play()
         main.Visible = not main.Visible
     end
 end)
@@ -113,6 +123,14 @@ function Codex:CreateTab(name)
     tabBtn.BorderSizePixel = 0
     Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0,8)
 
+    -- Hover effect
+    tabBtn.MouseEnter:Connect(function()
+        TweenService:Create(tabBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play()
+    end)
+    tabBtn.MouseLeave:Connect(function()
+        TweenService:Create(tabBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30,30,30)}):Play()
+    end)
+
     local page = Instance.new("ScrollingFrame", pages)
     page.Size = UDim2.new(1,0,1,0)
     page.ScrollBarImageTransparency = 1
@@ -147,6 +165,14 @@ function Codex:CreateButton(tab, text, callback)
     btn.BorderSizePixel = 0
     btn.AutoButtonColor = false
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
+
+    -- Hover effect
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45,45,45)}):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35,35,35)}):Play()
+    end)
 
     btn.MouseButton1Click:Connect(function()
         pcall(callback)
